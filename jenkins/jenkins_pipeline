@@ -1,41 +1,50 @@
 pipeline {
-    agent any
+    agent { label 'maven-agent' } // รันบน Jenkins agent ที่มี JDK และ Maven
 
-    tools {
-        // กำหนด Maven ที่ติดตั้งใน Jenkins
-        maven 'Maven3'  // ชื่อ Maven ที่ตั้งไว้ใน Jenkins Global Tool Configuration
-        jdk 'JDK11'     // กำหนด JDK (ถ้ามี)
+    environment {
+        MAVEN_OPTS = "-Dmaven.repo.local=.m2/repository"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone') {
             steps {
-                // ดึงโค้ดจาก Git (แก้ URL เป็น repo ตัวเอง)
-                git url: 'https://github.com/your-repo/your-project.git', branch: 'main'
+                git url: 'https://github.com/Bandicoot909/JK.git'
             }
         }
 
         stage('Build') {
             steps {
-                // รัน Maven build
-                sh 'mvn clean install'
+                dir('src') {
+                    sh 'mvn clean compile'
+                }
             }
         }
 
         stage('Test') {
             steps {
-                // ถ้ามี test สามารถรันแยกได้
-                sh 'mvn test'
+                dir('src') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                dir('test') {
+                    sh 'mvn package'
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Build and Test succeeded!'
+            archiveArtifacts artifacts: 'src/target/*.jar', fingerprint: true
+            echo '✅ Build and tests completed successfully!'
         }
+
         failure {
-            echo 'Build or Test failed.'
+            echo '❌ Build or tests failed.'
         }
     }
 }
