@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'maven-agent' } // รันบน Jenkins agent ที่มี JDK และ Maven
+   agent any
 
     environment {
         MAVEN_OPTS = "-Dmaven.repo.local=.m2/repository"
