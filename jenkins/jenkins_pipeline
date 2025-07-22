@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    tools {
+        // กำหนด Maven ที่ติดตั้งใน Jenkins
+        maven 'Maven3'  // ชื่อ Maven ที่ตั้งไว้ใน Jenkins Global Tool Configuration
+        jdk 'JDK11'     // กำหนด JDK (ถ้ามี)
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // ดึงโค้ดจาก Git (แก้ URL เป็น repo ตัวเอง)
+                git url: 'https://github.com/your-repo/your-project.git', branch: 'main'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // รัน Maven build
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // ถ้ามี test สามารถรันแยกได้
+                sh 'mvn test'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build and Test succeeded!'
+        }
+        failure {
+            echo 'Build or Test failed.'
+        }
+    }
+}
